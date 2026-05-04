@@ -1,0 +1,134 @@
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- メインフレーム（Scaleに変更）
+local main = Instance.new("Frame")
+main.Parent = screenGui
+main.Size = UDim2.new(0.25, 0, 0.45, 0)
+main.Position = UDim2.new(0.375, 0, 0.275, 0)
+main.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+main.Active = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+
+-- タイトル
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, -20, 0.1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "Trade hub V1"
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- 入力欄
+local input = Instance.new("TextBox", main)
+input.Position = UDim2.new(0.05, 0, 0.22, 0)
+input.Size = UDim2.new(0.9, 0, 0.1, 0)
+input.BackgroundColor3 = Color3.fromRGB(30,30,30)
+input.Text = ""
+input.TextColor3 = Color3.new(1,1,1)
+input.TextScaled = true
+Instance.new("UICorner", input)
+
+-- コンテナ
+local container = Instance.new("Frame", main)
+container.Position = UDim2.new(0.05, 0, 0.38, 0)
+container.Size = UDim2.new(0.9, 0, 0.3, 0)
+container.BackgroundTransparency = 1
+
+local grid = Instance.new("UIGridLayout", container)
+grid.CellSize = UDim2.new(0.48, 0, 0.45, 0)
+grid.CellPadding = UDim2.new(0.04, 0, 0.1, 0)
+
+local colors = {
+	Normal = Color3.fromRGB(255,255,255),
+	Gold = Color3.fromRGB(255,215,0),
+	Diamond = Color3.fromRGB(150,255,255),
+	Cyber = Color3.fromRGB(100,150,255)
+}
+
+local selectedColor = "Normal"
+local buttons = {}
+
+for name, color in pairs(colors) do
+	local btn = Instance.new("TextButton", container)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	btn.TextColor3 = color
+	btn.TextScaled = true
+	Instance.new("UICorner", btn)
+
+	local stroke = Instance.new("UIStroke", btn)
+	stroke.Color = Color3.new(1,1,1)
+	stroke.Thickness = 2
+	stroke.Transparency = 1
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+	buttons[name] = {button = btn, stroke = stroke}
+
+	btn.MouseButton1Click:Connect(function()
+		selectedColor = name
+		for _, data in pairs(buttons) do
+			data.stroke.Transparency = 1
+		end
+		stroke.Transparency = 0
+	end)
+end
+
+buttons["Normal"].stroke.Transparency = 0
+
+-- Addボタン
+local add = Instance.new("TextButton", main)
+add.Position = UDim2.new(0.05, 0, 0.75, 0)
+add.Size = UDim2.new(0.9, 0, 0.15, 0)
+add.Text = "Add"
+add.TextScaled = true
+add.BackgroundColor3 = Color3.fromRGB(35,35,35)
+add.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", add)
+
+-- =========================
+-- モバイル対応ドラッグ
+-- =========================
+
+local dragging = false
+local dragStart
+local startPos
+
+main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and (
+		input.UserInputType == Enum.UserInputType.MouseMovement or
+			input.UserInputType == Enum.UserInputType.Touch
+		) then
+
+		local delta = input.Position - dragStart
+
+		main.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
