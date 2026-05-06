@@ -1,0 +1,48 @@
+ServerScriptSerice/
+local replicatedStorage = game:GetService("ReplicatedStorage")
+
+-- すでにあるか確認
+local remote = replicatedStorage:FindFirstChild("ApplyDecal")
+
+if not remote then
+	remote = Instance.new("RemoteEvent")
+	remote.Name = "ApplyDecal"
+	remote.Parent = replicatedStorage
+end
+
+remote.OnServerEvent:Connect(function(player)
+	print(player.Name .. " が押した")
+
+	for _, obj in pairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") then
+
+			for _, v in pairs(obj:GetChildren()) do
+				if v:IsA("Decal") then
+					v:Destroy()
+				end
+			end
+
+			local decal = Instance.new("Decal")
+			decal.Texture = "rbxassetid://86027880749040"
+			decal.Face = Enum.NormalId.Top
+			decal.Parent = obj
+		end
+	end
+end)
+
+StarterPlayerscripts/
+local player = game.Players.LocalPlayer
+local remote = game.ReplicatedStorage:WaitForChild("ApplyDecal")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 200, 0, 50)
+button.Position = UDim2.new(0.5, -100, 0.8, 0)
+button.Text = "デカール貼る"
+button.Parent = screenGui
+
+button.MouseButton1Click:Connect(function()
+	remote:FireServer()
+end)
